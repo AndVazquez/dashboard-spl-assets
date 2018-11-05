@@ -1,0 +1,156 @@
+{% if dev %}
+    {% set root_assets_url = '/dynamic_render/' %}
+    {% set include_url = '' %}
+{% else %}
+    {% set root_assets_url = user_url %}
+    {% set include_url = 'templates/j2-templates/' %}
+{% endif %}
+
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+<head>
+    {% block title %}
+        <title>{{ Title }}</title>
+    {% endblock %}
+    {% if not dev %}
+        {% raw %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {% endraw %}
+    {% else %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    {% endif %}
+    {% block common_style %}
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+        <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700' rel='stylesheet' type='text/css'>
+
+        <link href="{{ static }}css/common/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="{{ static }}css/common/loaders.min.css" rel="stylesheet" type="text/css">
+        <link href="{{ static }}css/common/d3.slider.css" rel="stylesheet" type="text/css">
+        <link href="{{ static }}css/dashboard/default.css" rel="stylesheet" type="text/css">
+    {% endblock %}
+
+    {% block style_override %}
+    {% endblock %}
+</head>
+
+{# Content of the page #}
+{% block content %}
+    {% block navbar %}
+        {% include include_url+"html/components/nav-bar.html" %}
+    {% endblock %}
+    <body>
+    {% block loader %}
+        <div class="loader main">
+            <div class="loader-inner ball-spin-fade-loader"></div>
+        </div>
+    {% endblock %}
+    <div id="mobile" class="text-center">
+        <img src="{{ static }}img/faviconOEEU_medium.png" height="80">
+        <br><br>
+        <p>Se recomienda el uso de esta aplicación en pantallas relativamente
+        amplias para una buena experiencia con el dashboard</p>
+    </div>
+    <div class="container-fluid" id="root-container" style="opacity: 0; width: 100%; height: 100%;">
+        {% with layout=Layout %}
+            {% include include_url+'html/components/layout-constructor.html' %}
+        {% endwith %}
+    </div>
+    </body>
+{% endblock %}
+
+{# General importations #}
+
+{% block common_scripts %}
+    <script src="{{ static }}js/imports/d3.v4.min.js"></script>
+    <script src="{{ static }}js/imports/d3.tip.v4.js"></script>
+    <script src="{{ static }}js/imports/jQuery.v3.min.js"></script>
+    <script src="{{ static }}js/imports/popper.min.js"></script>
+    <script src="{{ static }}js/imports/bootstrap.min.js"></script>
+    <script src="{{ static }}js/imports/loaders.css.js"></script>
+    <script src="{{ static }}js/imports/d3-scale-chromatic.v0.3.min.js"></script>
+    <script src="{{ static }}js/imports/d3-composite-projection.js"></script>
+    <script src="{{ static }}js/imports/d3-geo.v1.min.js"></script>
+    <script src="{{ static }}js/imports/topojson.v1.min.js"></script>
+    <script src="{{ static }}js/imports/d3.slider.js"></script>
+{% endblock %}
+
+{# Importations based on the component being selected on the configuration #}
+{% if dev %}
+    {% for component in Components.Component %}
+        {% for type, configuration in component.items() %}
+            {% if type == 'ScatterDiagram' %}
+                {% if configuration|check('Controls.Map') %}
+                    <script src="
+                            {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/map/map.js"></script>
+                {% endif %}
+
+                {% if configuration|check('Controls.DataFilters') %}
+                    <script src="
+                            {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/filter/component-filter.js"></script>
+                {% endif %}
+                <script src="
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/scatter/scatter.js"></script>
+                <script src='
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/graphql-query-handlers/scatter-query-handler.js'></script>
+            {% elif type == 'Heatmap' %}
+                {% if configuration|check('Controls.DataFilters') %}
+                    <script src="
+                            {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/filter/component-filter.js"></script>
+                {% endif %}
+                <script src='
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/graphql-query-handlers/heatmap-query-handler.js'></script>
+                <script src='
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/heat-map/heat-map.js'></script>
+            {% elif type == 'ChordDiagram' %}
+                {% if configuration|check('Controls.DataFilters') %}
+                    <script src="
+                            {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/filter/component-filter.js"></script>
+                {% endif %}
+                <script src='
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/graphql-query-handlers/chord-query-handler.js'></script>
+                <script src='
+                        {{ root_assets_url }}{{ current_page }}/{{ configuration['@component_id'] }}/j2-templates/js/components/chord/chord-diagram.js'></script>
+                <script src="{{ static }}js/imports/d3.stretched.chord.js"></script>
+                <script src="{{ static }}js/imports/d3.chord.layout.sort.js"></script>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    {% if DataFilter %}
+        <script src='
+                {{ root_assets_url }}{{ current_page }}/{{ DataFilter['@component_id'] }}/j2-templates/js/components/filter/global-filter.js'></script>
+    {% endif %}
+    <script src='{{ root_assets_url }}{{ current_page }}/j2-templates/js/main.js'></script>
+{% else %}
+    {% for component in Components.Component %}
+        {% for type, configuration in component.items() %}
+            {% if configuration|check('Controls.Map') %}
+                <script src="{{ root_assets_url }}js/components/map/map.js"></script>
+            {% endif %}
+            {% if configuration|check('Controls.DataFilters') %}
+                <script src="{{ root_assets_url }}js/components/filter/{{ configuration['@component_id'] }}-component-filter.js"></script>
+            {% endif %}
+            {% if type == 'ScatterDiagram' %}
+                <script src="{{ root_assets_url }}js/components/scatter/{{ configuration['@component_id'] }}.js"></script>
+                <script src='{{ root_assets_url }}js/graphql-query-handlers/{{ configuration['@component_id'] }}-query-handler.js'></script>
+            {% elif type == 'Heatmap' %}
+                <script src='{{ root_assets_url }}js/graphql-query-handlers/{{ configuration['@component_id'] }}-query-handler.js'></script>
+                <script src='{{ root_assets_url }}js/components/heat-map/{{ configuration['@component_id'] }}.js'></script>
+            {% elif type == 'ChordDiagram' %}
+                <script src='{{ root_assets_url }}js/graphql-query-handlers/{{ configuration['@component_id'] }}-query-handler.js'></script>
+                <script src='{{ root_assets_url }}js/components/chord/{{ configuration['@component_id'] }}.js'></script>
+                <script src="{{ static }}js/imports/d3.stretched.chord.js"></script>
+                <script src="{{ static }}js/imports/d3.chord.layout.sort.js"></script>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    {% if DataFilter %}
+        <script src='{{ root_assets_url }}js/components/filter/global-filter.js'></script>
+    {% endif %}
+    <script src='{{ root_assets_url }}js/main{{ current_page }}.js'></script>
+{% endif %}
+
+{% block loadexportjs %}
+    <script src="{{ static }}js/export-svg/saveSvgAsPng.js"></script>
+{% endblock %}
+</html>

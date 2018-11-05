@@ -1,0 +1,36 @@
+{# Remplate for rendering the navigation bar specified in a particular configuration #}
+
+<nav id="OEEU_nav" class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="#">{{ NavigationBar.Brand }}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="fa fa-align-justify" style="color: white;"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown" style="margin: 0px">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0" style="z-index: 2000;">
+            {% if NavigationBar.LinkGroup %}
+                {% for link in NavigationBar.LinkGroup.Link %}
+                    <li class="nav-item">
+                        {% if current_page == link['@ref'] %}
+                            <a class="nav-link active" href={{ link['@ref'] }}>
+                                {{ link['#text'] }}
+                            </a>
+                        {% else %}
+                            <a class="nav-link" href={{ link['@ref'] }}>
+                                {{ link['#text'] }}
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            {% elif NavigationBar.Link %}
+                <a class="nav-link active" href={{ NavigationBar.Link['@ref'] }}>
+                    {{ NavigationBar.Link['#text'] }}
+                </a>
+            {% endif %}
+        </ul>
+        <ul class="navbar-nav my-2 my-lg-0">
+            <li class="nav-item"><a class="nav-link" href="#">{{ User }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout/">Salir</a></li>
+        </ul>
+    </div>
+</nav>
