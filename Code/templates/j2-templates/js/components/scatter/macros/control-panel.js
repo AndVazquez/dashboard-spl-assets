@@ -247,26 +247,22 @@ d3.select('#control-gr-{{ Component['@component_id'] }}')
     })
     .append("text")
     .attr("text-anchor", "middle")
-    {% if Component|check('Controls.GlobalReference.xAxis') %}
-    {% if Component|check('Controls.GlobalReference.xAxis.Description') %}
-    .html("{{ Component.Controls.GlobalReference.xAxis.Description }}");
+    {% if Component|check('Controls.GlobalReference.Description') %}
+        .html("{{ Component.Controls.GlobalReference.Description }}");
+{% else %}
+    .html("Referencia Global");
+{% endif %}
 
+{% if Component|check('Controls.GlobalReference.xAxis.Description') %}
 var grxAxisDescr = "{{ Component.Controls.GlobalReference.xAxis.Description }}";
 {% else %}
-.html("Eje X");
-
 var grxAxisDescr = "Eje X";
 {% endif %}
-{% elif Component|check('Controls.GlobalReference.yAxis') %}
-{% if Component|check('Controls.GlobalReference.yAxis.Description') %}
-.html("{{ Component.Controls.GlobalReference.yAxis.Description }}");
 
+{% if Component|check('Controls.GlobalReference.yAxis.Description') %}
 var gryAxisDescr = "{{ Component.Controls.GlobalReference.yAxis.Description }}";
 {% else %}
-.html("Eje Y");
-
 var gryAxisDescr = "Eje Y";
-{% endif %}
 {% endif %}
 
 var gr_dropdown = d3.select("body")
